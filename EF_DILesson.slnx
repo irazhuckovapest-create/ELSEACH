@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="domein/domein.csproj" Id="644ac0b4-1566-473a-9ed5-5f595ca12fde" />
   <Project Path="EF_DILesson/EF_DILesson.csproj" />
 </Solution>

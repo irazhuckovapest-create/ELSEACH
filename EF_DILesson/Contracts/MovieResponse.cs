@@ -9,5 +9,7 @@
         public string MovieUrl { get; set; }
         public int ReleaseYear { get; set; }
         public double Rating { get; set; }
+        public string Genre { get; set; } = "";
+        public string Country { get; set; } = "";
     }
 }

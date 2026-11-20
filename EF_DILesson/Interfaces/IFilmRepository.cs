@@ -1,4 +1,5 @@
-﻿using EF_DILesson.Models;
+﻿using System.Linq.Expressions;
+using EF_DILesson.Models;
 
 namespace EF_DILesson.Interfaces
 {
@@ -9,5 +10,6 @@ namespace EF_DILesson.Interfaces
         void Add(Film film);
         void Update(Film film);
         bool Delete(int id);
+        List<Film> SearchByCondition(Expression<Func<Film, bool>> predicate);
     }
 }

@@ -1,4 +1,5 @@
-﻿using EF_DILesson.Interfaces;
+﻿using System.Linq.Expressions;
+using EF_DILesson.Interfaces;
 using EF_DILesson.Models;
 
 namespace EF_DILesson.Repository
@@ -41,6 +42,11 @@ namespace EF_DILesson.Repository
             _context.Films.Remove(film);
             _context.SaveChanges();
             return true;
+        }
+
+        public List<Film> SearchByCondition(Expression<Func<Film, bool>> predicate)
+        {
+            return _context.Films.Where(predicate).ToList();
         }
     }
 }

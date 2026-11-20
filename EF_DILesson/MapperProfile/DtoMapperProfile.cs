@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using EF_DILesson.Dto;
 using EF_DILesson.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EF_DILesson.MapperProfile
 {
@@ -9,8 +8,12 @@ namespace EF_DILesson.MapperProfile
     {
         public DtoMapperProfile()
         {
-            CreateMap<UserRegisterDto, User>();
-            CreateMap<UserLoginDto, User>();
+            CreateMap<UserDto, User>()
+                .ForMember(u => u.UserName, o => o.MapFrom(d => d.Username))
+                .ForMember(u => u.Id, o => o.Ignore());
+
+            CreateMap<User, UserDto>()
+                .ForMember(d => d.Username, o => o.MapFrom(u => u.UserName));
         }
     }
 }

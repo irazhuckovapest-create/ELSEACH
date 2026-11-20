@@ -1,4 +1,5 @@
-﻿using EF_DILesson.Models;
+﻿using EF_DILesson.Dto;
+using EF_DILesson.Models;
 
 namespace EF_DILesson.Interfaces
 {
@@ -9,5 +10,6 @@ namespace EF_DILesson.Interfaces
         void AddFilm(Film film);
         Film UpdateFilm(int id, Film newData);
         bool DeleteFilm(int id);
+        List<Film> SearchFilms(FilmFilterDto filter);
     }
 }

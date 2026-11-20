@@ -1,11 +1,12 @@
 using EF_DILesson;
-using EF_DILesson.MapperProfile;
 using EF_DILesson.Interfaces;
+using EF_DILesson.MapperProfile;
 using EF_DILesson.Models;
 using EF_DILesson.Repository;
 using EF_DILesson.Service;
 using EF_DILesson.Validators;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,21 +31,31 @@ builder.Services.AddOpenApi(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<UserRepository>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddIdentityCore<User>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+    options.User.RequireUniqueEmail = true;
+}).AddEntityFrameworkStores<AppDbContext>();
+
+builder.Services.AddTransient<IdentityAuthService>();
 
 builder.Services.AddScoped<IFilmRepository, FilmRepository>();
 builder.Services.AddScoped<IFilmService, FilmService>();
-
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateMovieRequestValidator>();
+
 builder.Services.AddAutoMapper(opt =>
 {
     opt.AddProfile<RequestResponseProfile>();
     opt.AddProfile<DtoMapperProfile>();
 });
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
@@ -64,6 +75,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.Migrate();
+
     if (!context.Films.Any())
     {
         context.Films.Add(new Film
@@ -79,8 +91,8 @@ using (var scope = app.Services.CreateScope())
         context.Films.Add(new Film
         {
             Title = "Аннабель",
-            Description = "Подружжя, що чекає на дитину, опиняється в центрі жахів через стару колекційну ляльку.",
-            PosterUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6kmQWO9oPyY9ZZGl18ePaaFMeSWtJxH8ZHwymcac6_Q&s=10",
+            Description = "Подружя, що чекає на дитину, опиняється в центрі жахів через стару колекційну ляльку.",
+            PosterUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRau7zkJ7YTJ3M3i5RTBkQnkeI4CfxZMwfWKQ_y8oMT2g&s",
             MovieUrl = "https://example.com/annabelle",
             ReleaseYear = 2014,
             Rating = 6.4
@@ -108,9 +120,9 @@ using (var scope = app.Services.CreateScope())
 
         context.Films.Add(new Film
         {
-            Title = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGah_FGoOeru2_Sq1evwn3r_QZyTzo9JLCo7kvnAhNMnrgFLihi6z0gHhQ&s=10",
+            Title = "3 метра над рівнем неба",
             Description = "Бунтівний хлопець і вихована дівчина з багатої родини закохуються, попри різні світи.",
-            PosterUrl = "/posters/three-meters.jpg",
+            PosterUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGah_FGoOeru2_Sq1evwn3r_QZyTzo9JLCo7kvnAhNMnrgFLihi6z0gHhQ&s=10",
             MovieUrl = "https://example.com/three-meters",
             ReleaseYear = 2010,
             Rating = 9.2
@@ -183,11 +195,36 @@ using (var scope = app.Services.CreateScope())
     }
 
     context.SaveChanges();
+
+    var genreData = new (string Title, string Genre, string Country)[]
+    {
+        ("Бабадук", "Жахи", "Австралія"),
+        ("Аннабель", "Жахи", "США"),
+        ("Пила", "Жахи", "США"),
+        ("Обсесія", "Жахи", "США"),
+        ("3 метра над рівнем неба", "Мелодрама", "Іспанія"),
+        ("Інша мама", "Трилер", "США"),
+        ("Пасажири", "Фантастика", "США"),
+        ("Інтерстеллар", "Фантастика", "США"),
+        ("Острів проклятих", "Трилер", "США"),
+        ("Зникла", "Трилер", "США"),
+    };
+
+    foreach (var g in genreData)
+    {
+        var film = context.Films.FirstOrDefault(f => f.Title == g.Title && string.IsNullOrEmpty(f.Genre));
+        if (film != null)
+        {
+            film.Genre = g.Genre;
+            film.Country = g.Country;
+        }
+    }
+
+    context.SaveChanges();
 }
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReact");
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

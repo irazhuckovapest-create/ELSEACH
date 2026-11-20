@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EF_DILesson.Contracts;
+using EF_DILesson.Dto;
 using EF_DILesson.Interfaces;
 using EF_DILesson.Models;
 using FluentValidation;
@@ -14,16 +15,20 @@ namespace EF_DILesson.Controllers
         private readonly IFilmService _filmService;
         private readonly IValidator<CreateMovieRequest> _createValidator;
         private readonly IValidator<UpdateMovieRequest> _updateValidator;
+        private readonly IValidator<FilmFilterRequest> _filterValidator;
         private readonly IMapper _mapper;
 
-        public FilmController(IFilmService filmService,
+        public FilmController(
+            IFilmService filmService,
             IValidator<CreateMovieRequest> createValidator,
             IValidator<UpdateMovieRequest> updateValidator,
+            IValidator<FilmFilterRequest> filterValidator,
             IMapper mapper)
         {
             _filmService = filmService;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
+            _filterValidator = filterValidator;
             _mapper = mapper;
         }
 
@@ -31,6 +36,18 @@ namespace EF_DILesson.Controllers
         public ActionResult<List<MovieResponse>> GetAll()
         {
             var films = _filmService.GetAllFilms();
+            return Ok(_mapper.Map<List<MovieResponse>>(films));
+        }
+
+        [HttpGet("search")]
+        public ActionResult<List<MovieResponse>> Search([FromQuery] FilmFilterRequest request)
+        {
+            var res = _filterValidator.Validate(request);
+            if (!res.IsValid) return BadRequest(res.Errors);
+
+            var filter = _mapper.Map<FilmFilterDto>(request);
+            var films = _filmService.SearchFilms(filter);
+
             return Ok(_mapper.Map<List<MovieResponse>>(films));
         }
 

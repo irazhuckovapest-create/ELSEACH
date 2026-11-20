@@ -1,12 +1,11 @@
-﻿namespace EF_DILesson.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace EF_DILesson.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        public int Id { get; set; }
-        public string Login { get; set; }
-        public string Password { get; set; }
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public int Age { get; set; }
+        public string DisplayName { get; set; }
+        public string PhotoPath { get; set; }
+        // public List<Film> OldFilm { get; set; }
     }
 }

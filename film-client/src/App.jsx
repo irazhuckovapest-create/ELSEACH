@@ -1,38 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./Login";
 import Register from "./Register";
 import Films from "./Films";
 import "./App.css";
 
 function App() {
-  const [page, setPage] = useState(
-    localStorage.getItem("loggedIn") === "true" ? "films" : "login"
-  );
+    useEffect(() => {
+        function move(e) {
+            document.documentElement.style.setProperty("--mx", e.clientX + "px");
+            document.documentElement.style.setProperty("--my", e.clientY + "px");
+        }
+        window.addEventListener("mousemove", move);
+        return () => window.removeEventListener("mousemove", move);
+    }, []);
 
-  function handleLoginSuccess() {
-    localStorage.setItem("loggedIn", "true");
-    setPage("films");
-  }
+    const [page, setPage] = useState(
+        localStorage.getItem("loggedIn") === "true" ? "films" : "login"
+    );
 
-  function handleLogout() {
-    localStorage.removeItem("loggedIn");
-    setPage("login");
-  }
+    function handleLoginSuccess() {
+        localStorage.setItem("loggedIn", "true");
+        setPage("films");
+    }
 
-  if (page === "films") {
-    return <Films onLogout={handleLogout} />;
-  }
+    function handleLogout() {
+        localStorage.removeItem("loggedIn");
+        setPage("login");
+    }
 
-  if (page === "register") {
-    return <Register goLogin={() => setPage("login")} />;
-  }
+    if (page === "films") {
+        return <Films onLogout={handleLogout} />;
+    }
 
-  return (
-    <Login
-      onSuccess={handleLoginSuccess}
-      goRegister={() => setPage("register")}
-    />
-  );
+    if (page === "register") {
+        return <Register goLogin={() => setPage("login")} />;
+    }
+
+    return (
+        <Login
+            onSuccess={handleLoginSuccess}
+            goRegister={() => setPage("register")}
+        />
+    );
 }
 
 export default App;
